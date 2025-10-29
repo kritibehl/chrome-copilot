@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "Chrome Copilot — Ambient AI Debugging",
+    "version": "0.1.0",
+    "description": "Explain stack traces, diagnose root causes, and propose safe fixes inline using Chrome's built-in AI.",
+    "action": { "default_popup": "ui/popup.html" },
+    "icons": { "128": "assets/icon128.png" },
+    "permissions": ["activeTab", "scripting", "storage"],
+    "host_permissions": ["<all_urls>"],
+    "background": { "service_worker": "background.js", "type": "module" },
+    "content_scripts": [{
+      "matches": ["<all_urls>"],
+      "js": ["content/detectors.js", "content/content.js"],
+      "css": ["content/overlay.css"],
+      "run_at": "document_idle"
+    }],
+    "side_panel": { "default_path": "ui/sidepanel.html" },
+    "trial_tokens": [
+      "REPLACE_WITH_REWRITER_ORIGIN_TRIAL_TOKEN_IF_AVAILABLE"
+    ]
+  }
+  
