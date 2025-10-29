@@ -1,0 +1,8 @@
+#copilot-fab{
+    position: fixed; right: 18px; bottom: 18px; z-index: 2147483647;
+    padding: 10px 14px; border-radius: 14px; border: 1px solid #2f2f2f50;
+    background: #111; color: #fff; box-shadow: 0 6px 20px #0006; cursor: pointer;
+    font: 600 14px/1.2 system-ui, sans-serif;
+  }
+  .copilot-note{ background:#141414; color:#eaeaea; padding:8px 10px; border-radius:10px; border:1px solid #2f2f2f50; }
+  
