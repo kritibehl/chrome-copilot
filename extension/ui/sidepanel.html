@@ -1,0 +1,16 @@
+<!doctype html><html><head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../content/overlay.css"/>
+    <style>body{font:14px/1.4 system-ui,sans-serif;padding:12px;background:#0b0b0b;color:#eaeaea}</style>
+    </head><body>
+      <h2>Chrome Copilot</h2>
+      <textarea id="input" rows="8" style="width:100%" placeholder="Select code/logs on the page or paste here"></textarea>
+      <div style="margin:8px 0;">
+        <button id="explain">Explain</button>
+        <button id="diagnose">Diagnose</button>
+        <button id="rewrite">Rewrite</button>
+      </div>
+      <pre id="out" class="copilot-note"></pre>
+      <script type="module" src="sidepanel.js"></script>
+    </body></html>
+    
