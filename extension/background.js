@@ -1,4 +1,5 @@
 import { setLatestCapture, getLatestCapture } from './core/state/sessionStore.js';
+import { parseErrorInput } from './core/parsers/errorParser.js';
 
 chrome.runtime.onInstalled.addListener(async () => {
   await chrome.sidePanel.setOptions({ enabled: true });
@@ -17,6 +18,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case 'COPILOT_GET_LATEST_CAPTURE': {
           const capture = await getLatestCapture();
           sendResponse({ ok: true, capture });
+          break;
+        }
+
+        case 'COPILOT_PARSE_INPUT': {
+          const parsed = parseErrorInput(message.payload?.text || '');
+          sendResponse({ ok: true, parsed });
           break;
         }
 

@@ -33,6 +33,19 @@ async function prefillFromLatestCapture() {
   }
 }
 
+async function parseInput(text) {
+  const res = await chrome.runtime.sendMessage({
+    type: 'COPILOT_PARSE_INPUT',
+    payload: { text }
+  });
+
+  if (!res?.ok) {
+    throw new Error(res?.error || 'Failed to parse input');
+  }
+
+  return res.parsed;
+}
+
 async function run(fn) {
   const ta = document.getElementById('input');
   const out = document.getElementById('out');
@@ -43,12 +56,20 @@ async function run(fn) {
     return;
   }
 
-  out.textContent = '…thinking (on-device)';
+  out.textContent = '…analyzing';
 
   try {
+    const parsed = await parseInput(text);
     const res = await fn(text);
-    out.textContent =
-      typeof res === 'string' ? res : JSON.stringify(res, null, 2);
+
+    out.textContent = JSON.stringify(
+      {
+        parsed,
+        ai: res
+      },
+      null,
+      2
+    );
   } catch (e) {
     out.textContent = `Error: ${e.message}`;
   }
