@@ -1,0 +1,9 @@
+{
+  "name": "chrome-copilot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:core": "node extension/tests/runCoreTests.js"
+  }
+}

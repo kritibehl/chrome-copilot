@@ -1,0 +1,22 @@
+[
+  {
+    "name": "undefined-property-access",
+    "input": "TypeError: Cannot read properties of undefined (reading 'map')\n    at UserList (UserList.jsx:14:23)\n    at renderWithHooks (react-dom.development.js:16305:18)"
+  },
+  {
+    "name": "network-request-failure",
+    "input": "NetworkError when attempting to fetch resource.\nGET https://api.example.com/users net::ERR_FAILED"
+  },
+  {
+    "name": "cors-policy-failure",
+    "input": "Access to fetch at 'https://api.example.com/data' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check."
+  },
+  {
+    "name": "undefined-symbol",
+    "input": "ReferenceError: userProfile is not defined\n    at renderProfile (profile.js:42:7)"
+  },
+  {
+    "name": "syntax-failure",
+    "input": "SyntaxError: Unexpected token ')'\n    at app.js:18:12"
+  }
+]
