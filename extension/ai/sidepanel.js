@@ -33,20 +33,20 @@ async function prefillFromLatestCapture() {
   }
 }
 
-async function parseInput(text) {
+async function analyzeInput(text) {
   const res = await chrome.runtime.sendMessage({
-    type: 'COPILOT_PARSE_INPUT',
+    type: 'COPILOT_ANALYZE_INPUT',
     payload: { text }
   });
 
   if (!res?.ok) {
-    throw new Error(res?.error || 'Failed to parse input');
+    throw new Error(res?.error || 'Failed to analyze input');
   }
 
-  return res.parsed;
+  return res;
 }
 
-async function run(fn) {
+async function runWorkflow() {
   const ta = document.getElementById('input');
   const out = document.getElementById('out');
   const text = ta.value.trim();
@@ -56,16 +56,46 @@ async function run(fn) {
     return;
   }
 
-  out.textContent = '…analyzing';
+  out.textContent = '…analyzing workflow';
 
   try {
-    const parsed = await parseInput(text);
-    const res = await fn(text);
+    const result = await analyzeInput(text);
+    out.textContent = JSON.stringify(
+      {
+        report: result.report,
+        localAnalysis: result.localAnalysis,
+        classification: result.classification,
+        cluster: result.cluster,
+        metrics: result.report?.metrics || {}
+      },
+      null,
+      2
+    );
+  } catch (e) {
+    out.textContent = `Error: ${e.message}`;
+  }
+}
+
+async function runAi(fn) {
+  const ta = document.getElementById('input');
+  const out = document.getElementById('out');
+  const text = ta.value.trim();
+
+  if (!text) {
+    out.textContent = 'Select some code/logs or paste into the box.';
+    return;
+  }
+
+  out.textContent = '…thinking (on-device)';
+
+  try {
+    const workflow = await analyzeInput(text);
+    const ai = await fn(text);
 
     out.textContent = JSON.stringify(
       {
-        parsed,
-        ai: res
+        report: workflow.report,
+        ai
       },
       null,
       2
@@ -78,7 +108,20 @@ async function run(fn) {
 document.addEventListener('DOMContentLoaded', async () => {
   await prefillFromLatestCapture();
 
-  document.getElementById('explain').onclick = () => run(explain);
-  document.getElementById('diagnose').onclick = () => run(diagnose);
-  document.getElementById('rewrite').onclick = () => run(rewrite);
+  document.getElementById('explain').onclick = () => runAi(explain);
+  document.getElementById('diagnose').onclick = () => runAi(diagnose);
+  document.getElementById('rewrite').onclick = () => runAi(rewrite);
+
+  const input = document.getElementById('input');
+  if (input && !document.getElementById('workflow-analyze')) {
+    const btn = document.createElement('button');
+    btn.id = 'workflow-analyze';
+    btn.textContent = 'Analyze Workflow';
+    btn.style.marginRight = '8px';
+
+    const explainBtn = document.getElementById('explain');
+    explainBtn?.parentNode?.insertBefore(btn, explainBtn);
+
+    btn.onclick = runWorkflow;
+  }
 });
