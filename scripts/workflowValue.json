@@ -1,0 +1,17 @@
+{
+  "baselineManualWorkflow": [
+    "Copy stack trace from page",
+    "Open docs/search/chat tool",
+    "Paste raw error",
+    "Interpret likely error type",
+    "Identify likely source file/function",
+    "Write probable cause summary",
+    "Draft next debugging steps",
+    "Rewrite into shareable bug summary"
+  ],
+  "chromeCopilotWorkflow": [
+    "Click Copilot",
+    "Run Analyze Workflow",
+    "Copy or download issue summary"
+  ]
+}

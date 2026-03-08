@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:core": "node extension/tests/runCoreTests.js"
+    "test:core": "node extension/tests/runCoreTests.js",
+    "bench:core": "node scripts/benchmarkWorkflowCore.js",
+    "bench:cluster": "node scripts/benchmarkClusterStability.js",
+    "bench:value": "node scripts/benchmarkWorkflowValue.js"
   }
 }

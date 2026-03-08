@@ -1,0 +1,43 @@
+
+> chrome-copilot@0.1.0 bench:core
+> node scripts/benchmarkWorkflowCore.js
+
+{
+  "fixtureCount": 5,
+  "iterationsPerFixture": 200,
+  "totalRuns": 1000,
+  "metrics": {
+    "timeToFirstReportMs": {
+      "median": 0.006,
+      "p95": 0.013
+    },
+    "parseLatencyMs": {
+      "median": 0.002,
+      "p95": 0.003
+    },
+    "classificationLatencyMs": {
+      "median": 0,
+      "p95": 0.001
+    },
+    "clusteringLatencyMs": {
+      "median": 0.001,
+      "p95": 0.003
+    },
+    "localAnalysisLatencyMs": {
+      "median": 0,
+      "p95": 0
+    },
+    "reportBuildLatencyMs": {
+      "median": 0,
+      "p95": 0.001
+    },
+    "markdownExportLatencyMs": {
+      "median": 0.002,
+      "p95": 0.003
+    },
+    "reportCompletenessScore": {
+      "average": 1,
+      "max": 1
+    }
+  }
+}
