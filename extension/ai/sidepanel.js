@@ -53,6 +53,15 @@ async function setLocalOnlyMode(enabled) {
   if (!res?.ok) throw new Error(res?.error || 'Failed to set local-only mode');
 }
 
+async function getCacheStats() {
+  const res = await chrome.runtime.sendMessage({
+    type: 'COPILOT_GET_CACHE_STATS'
+  });
+
+  if (!res?.ok) throw new Error(res?.error || 'Failed to get cache stats');
+  return res.stats;
+}
+
 async function analyzeInput(text) {
   const res = await chrome.runtime.sendMessage({
     type: 'COPILOT_ANALYZE_INPUT',
@@ -64,6 +73,21 @@ async function analyzeInput(text) {
   }
 
   return res;
+}
+
+function renderWorkflowOutput(result) {
+  const out = document.getElementById('out');
+  out.textContent = JSON.stringify(
+    {
+      report: result.report,
+      localAnalysis: result.localAnalysis,
+      classification: result.classification,
+      cluster: result.cluster,
+      metrics: result.report?.metrics || {}
+    },
+    null,
+    2
+  );
 }
 
 async function runWorkflow() {
@@ -81,18 +105,8 @@ async function runWorkflow() {
   try {
     const result = await analyzeInput(text);
     lastWorkflowResult = result;
-
-    out.textContent = JSON.stringify(
-      {
-        report: result.report,
-        localAnalysis: result.localAnalysis,
-        classification: result.classification,
-        cluster: result.cluster,
-        metrics: result.report?.metrics || {}
-      },
-      null,
-      2
-    );
+    renderWorkflowOutput(result);
+    await refreshCacheStatsLabel();
   } catch (e) {
     out.textContent = `Error: ${e.message}`;
   }
@@ -123,6 +137,7 @@ async function runAi(fn) {
       null,
       2
     );
+    await refreshCacheStatsLabel();
   } catch (e) {
     out.textContent = `Error: ${e.message}`;
   }
@@ -141,6 +156,37 @@ async function copyMarkdownExport() {
     out.textContent = 'Markdown issue summary copied to clipboard.';
   } catch (e) {
     out.textContent = `Error: ${e.message}`;
+  }
+}
+
+function downloadMarkdownExport() {
+  const out = document.getElementById('out');
+
+  if (!lastWorkflowResult?.markdown || !lastWorkflowResult?.report?.title) {
+    out.textContent = 'Run Analyze Workflow first to download an export.';
+    return;
+  }
+
+  const blob = new Blob([lastWorkflowResult.markdown], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeName = lastWorkflowResult.report.title.replace(/[^a-z0-9-_]+/gi, '_').toLowerCase();
+
+  a.href = url;
+  a.download = `${safeName || 'issue-summary'}.md`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  out.textContent = 'Markdown issue summary downloaded.';
+}
+
+async function refreshCacheStatsLabel() {
+  const stats = await getCacheStats();
+  const label = document.getElementById('cache-stats-label');
+  if (label) {
+    label.textContent = `Cache H/M: ${stats.hits}/${stats.misses}`;
   }
 }
 
@@ -165,6 +211,15 @@ async function mountControls() {
     exportBtn.style.marginRight = '8px';
     exportBtn.onclick = copyMarkdownExport;
     parent.insertBefore(exportBtn, explainBtn);
+  }
+
+  if (!document.getElementById('workflow-download')) {
+    const downloadBtn = document.createElement('button');
+    downloadBtn.id = 'workflow-download';
+    downloadBtn.textContent = 'Download Report';
+    downloadBtn.style.marginRight = '8px';
+    downloadBtn.onclick = downloadMarkdownExport;
+    parent.insertBefore(downloadBtn, explainBtn);
   }
 
   if (!document.getElementById('local-only-toggle')) {
@@ -194,6 +249,15 @@ async function mountControls() {
     label.appendChild(span);
     parent.insertBefore(label, explainBtn);
   }
+
+  if (!document.getElementById('cache-stats-label')) {
+    const stats = document.createElement('span');
+    stats.id = 'cache-stats-label';
+    stats.style.marginRight = '10px';
+    parent.insertBefore(stats, explainBtn);
+  }
+
+  await refreshCacheStatsLabel();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

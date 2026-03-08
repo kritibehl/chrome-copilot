@@ -7,6 +7,7 @@ import { buildIssueReport } from './core/reports/reportBuilder.js';
 import { buildMarkdownExport } from './core/reports/exportIssueSummary.js';
 import { getCachedAnalysis, setCachedAnalysis } from './core/cache/signatureCache.js';
 import { getLocalOnlyMode, setLocalOnlyMode } from './core/settings/modeStore.js';
+import { recordCacheHit, recordCacheMiss, getCacheStats } from './core/cache/cacheStats.js';
 
 chrome.runtime.onInstalled.addListener(async () => {
   await chrome.sidePanel.setOptions({ enabled: true });
@@ -40,6 +41,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           break;
         }
 
+        case 'COPILOT_GET_CACHE_STATS': {
+          const stats = await getCacheStats();
+          sendResponse({ ok: true, stats });
+          break;
+        }
+
         case 'COPILOT_ANALYZE_INPUT': {
           const text = message.payload?.text || '';
           const localOnlyMode = await getLocalOnlyMode();
@@ -58,6 +65,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           const t4 = performance.now();
 
           if (cached) {
+            const stats = await recordCacheHit();
+
             sendResponse({
               ok: true,
               parsed,
@@ -73,7 +82,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                   clusteringLatencyMs: Number((t3 - t2).toFixed(2)),
                   cacheLookupLatencyMs: Number((t4 - t3).toFixed(2)),
                   cacheStatus: 'hit',
-                  localOnlyMode
+                  localOnlyMode,
+                  cacheHits: stats.hits,
+                  cacheMisses: stats.misses
                 }
               },
               markdown: cached.markdown
@@ -84,6 +95,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           const localAnalysis = buildLocalAnalysis(parsed, classification, cluster);
           const t5 = performance.now();
 
+          const stats = await recordCacheMiss();
+
           const metrics = {
             parseLatencyMs: Number((t1 - t0).toFixed(2)),
             classificationLatencyMs: Number((t2 - t1).toFixed(2)),
@@ -91,7 +104,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             cacheLookupLatencyMs: Number((t4 - t3).toFixed(2)),
             localAnalysisLatencyMs: Number((t5 - t4).toFixed(2)),
             cacheStatus: 'miss',
-            localOnlyMode
+            localOnlyMode,
+            cacheHits: stats.hits,
+            cacheMisses: stats.misses
           };
 
           const report = buildIssueReport({
