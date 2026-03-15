@@ -10,28 +10,30 @@ Chrome Copilot is a privacy-aware browser debugging tool that reduces debugging 
 
 ## Why It Matters
 
-- Reduced structured debugging handoff from **8 manual steps to 3** — a **62.5% reduction**
-- Achieved **100% report completeness** on the current fixture-backed benchmark set
-
-- Validated the workflow core across **5 representative browser error categories**
-- Benchmarked across **1,000 workflow-core runs**
+| Metric | Result |
+|--------|--------|
+| Workflow step reduction | 8 steps → 3 — **62.5% reduction** |
+| Report completeness | **100%** on the current fixture-backed benchmark set |
+| Error categories validated | **5** representative browser error types |
+| Benchmark scale | **1,000** workflow-core runs |
+| Cluster stability | **80%** in normalization benchmark |
 
 ---
 
 ## The Problem It Solves
 
-Every browser debugging session tends to follow the same manual sequence:
+Every browser debugging session follows the same manual sequence:
 
 1. Copy an error or stack trace from the page
 2. Open docs, search, or a chat tool
 3. Paste the raw error
 4. Interpret what kind of failure it is
-5. Figure out which file or function is relevant
+5. Identify the relevant file or function
 6. Write a probable-cause note
 7. Draft next debugging steps
 8. Rewrite everything into a report for handoff
 
-Chrome Copilot compresses this into a structured in-browser workflow.
+Chrome Copilot compresses this into a structured in-browser workflow — **3 steps instead of 8**.
 
 ---
 
@@ -51,16 +53,16 @@ The extension gathers:
 - Capture timestamp
 
 ### 4. The side panel opens pre-filled
-The captured content appears in an analysis-ready panel — no manual copy-paste required.
+Captured content appears in an analysis-ready panel — no manual copy-paste required.
 
 ### 5. Run workflow analysis
-Clicking **Analyze Workflow** runs the full debugging pipeline.
+Click **Analyze Workflow** to run the full debugging pipeline.
 
 ---
 
 ## Example
 
-### Input
+**Input**
 
 ```
 TypeError: Cannot read properties of undefined (reading 'map')
@@ -68,7 +70,7 @@ TypeError: Cannot read properties of undefined (reading 'map')
     at renderWithHooks (react-dom.development.js:16305:18)
 ```
 
-### Output
+**Output**
 
 ```
 Signature Type:    undefined-property-access
@@ -87,25 +89,23 @@ Next Steps:
 ## How the Analysis Pipeline Works
 
 ### Stage 1 — Parse Raw Input
-The tool parses raw errors and logs into structured fields: error type, message, stack frames, probable file, probable function, and debugging tags. This is a **deterministic parser**, not freeform AI interpretation.
+Parses raw errors and logs into structured fields: error type, message, stack frames, probable file, probable function, and debugging tags. This is a deterministic parser, not freeform AI interpretation.
 
 ### Stage 2 — Classify the Failure Signature
-The failure is classified into a known debugging category:
+Classifies the failure into a known debugging category with a confidence score and associated hints.
 
 | Category | Description |
-|---|---|
+|----------|-------------|
 | `undefined-property-access` | Reading from null/undefined |
 | `network-request-failure` | Failed fetch or XHR |
 | `cors-policy-failure` | Cross-origin block |
 | `undefined-symbol` | Reference errors |
 | `syntax-failure` | Parse-time errors |
 | `render-path-failure` | Component/render failures |
-| `unclassified-error` | Unclassified errors |
-
-Each classification includes a confidence score and associated hints.
+| `unclassified-error` | Catch-all for unknown patterns |
 
 ### Stage 3 — Cluster Recurring Errors
-The tool normalizes noisy error variations (changing line numbers, request IDs, hex trace IDs, URL noise) into a stable signature and cluster ID. Repeated failures are recognized as the same issue — enabling caching, consistent triage, and smarter repeated workflows.
+Normalizes noisy error variants (changing line numbers, request IDs, hex trace IDs, URL noise) into a stable signature and cluster ID. Repeated failures are recognized as the same issue — enabling caching, consistent triage, and smarter repeated workflows.
 
 ### Stage 4 — Local Deterministic Analysis
 Even without AI, the tool generates:
@@ -114,19 +114,30 @@ Even without AI, the tool generates:
 - Confidence rating
 - Cluster-linked debugging guidance
 
-This means the extension is **fully functional in local-only deterministic mode**.
+The extension is **fully functional in local-only deterministic mode**.
 
 ### Stage 5 — Build a Structured Issue Report
 The output report includes:
 
-```
-Title · Issue Summary · Probable Cause · Severity
-Normalized Signature · Cluster ID · Classification
-Parsed Data · Next Steps · Metrics
-```
+> Title · Issue Summary · Probable Cause · Severity  
+> Normalized Signature · Cluster ID · Classification  
+> Parsed Data · Next Steps · Metrics
 
 ### Stage 6 — Export
-The report is exported as Markdown — ready to copy or download as a `.md` file for issue trackers, handoff notes, or QA documentation.
+Reports are exported as Markdown — ready to copy or download as a `.md` file for issue trackers, handoff notes, or QA documentation.
+
+---
+
+## Common Errors and Fixes
+
+| Error Pattern | Likely Cause | Typical Fix |
+|---------------|--------------|-------------|
+| `undefined-property-access` | Data is null or undefined before access | Add null guards, loading states, or initialization checks |
+| `network-request-failure` | Request failed before response was returned | Verify URL, server reachability, auth, and response status |
+| `cors-policy-failure` | Browser blocked cross-origin request | Check preflight behavior and server CORS headers |
+| `undefined-symbol` | Variable or import is missing or renamed | Verify scope, imports, and recent refactors |
+| `syntax-failure` | Invalid syntax near reported line | Inspect delimiters, commas, quotes, and generated code |
+| `render-path-failure` | UI render assumed unavailable state/props | Add defensive rendering and verify async data readiness |
 
 ---
 
@@ -151,19 +162,7 @@ The report is exported as Markdown — ready to copy or download as a `.md` file
 +---------------------------------------------+
 ```
 
-The extension is built around a deterministic workflow core. AI sits on top as an optional enhancement layer rather than acting as the primary logic engine.
-
----
-
-## Current Benchmark Results
-
-| Metric | Result |
-|---|---|
-| Workflow step reduction | 8 steps to 3 — **62.5% reduction** |
-| Report completeness | **100%** on the current fixture-backed benchmark set |
-| Error categories covered | **5** representative browser/frontend error types |
-| Benchmark scale | **1,000** workflow-core runs |
-| Noisy-variant cluster stability | **80%** in the current normalization benchmark |
+The extension is built around a **deterministic workflow core**. AI sits on top as an optional enhancement layer rather than acting as the primary logic engine.
 
 ---
 
@@ -184,19 +183,22 @@ Every workflow run records:
 - Cache status (hit / miss)
 - Local-only mode state
 
----
+### Validation
+Fixture-based tests cover representative failure patterns. Each fixture validates:
+- Parsing
+- Classification
+- Cluster ID generation
+- Signature normalization
+- Report building
+- Next-step generation
+- Repeated-run clustering stability
 
-## Validation
-
-Fixture-based tests cover representative failure patterns:
-
+Validated patterns include:
 - `undefined-property-access`
 - `network-request-failure`
 - `cors-policy-failure`
 - `undefined-symbol`
 - `syntax-failure`
-
-Each fixture validates: parsing, classification, cluster ID generation, signature normalization, report building, next-step generation, and repeated-run clustering stability.
 
 ---
 
@@ -205,7 +207,7 @@ Each fixture validates: parsing, classification, cluster ID generation, signatur
 Most browser AI tools make AI the entire product. Chrome Copilot inverts that design.
 
 | Approach | This Project |
-|---|---|
+|----------|-------------|
 | Generic chatbot | ❌ |
 | AI as primary logic | ❌ |
 | Deterministic workflow core | ✅ |
@@ -233,7 +235,7 @@ Most browser AI tools make AI the entire product. Chrome Copilot inverts that de
 3. Click **Load unpacked**
 4. Select the `extension/` folder
 5. Open a page with logs or stack traces
-6. Click the floating **Copilot** button
+6. Click the floating Copilot button
 7. Open the side panel and click **Analyze Workflow**
 
 ---
