@@ -228,6 +228,23 @@ Most browser AI tools make AI the entire product. Chrome Copilot inverts that de
 
 ---
 
+
+## Partner / Playback Troubleshooting Use Cases
+
+Chrome Copilot can also be used as a browser-side troubleshooting workflow for partner-facing incidents such as:
+- video player not loading
+- partner embed blocked with HTTP 403
+- playback bootstrap timeout
+- browser CORS failures
+- client-side initialization issues after network failure
+
+Supporting artifacts:
+- `docs/partner_debugging_playbook.md`
+- `reports/browser_network_issue_report.md`
+- `examples/youtube_tv_playback_issue.json`
+- `examples/http_403_partner_embed_issue.json`
+- `examples/cors_failure_issue.json`
+
 ## Run Locally
 
 1. Open `chrome://extensions/`
