@@ -1,0 +1,53 @@
+{
+  "incident_id": "YT-TV-001",
+  "title": "Partner reports TV/web playback bootstrap failure",
+  "surface": "embedded video playback",
+  "partner_report": {
+    "symptom": "Video player does not begin playback and remains in loading state",
+    "expected_behavior": "Player should initialize and start playback",
+    "actual_behavior": "Player container renders but bootstrap/playback never completes"
+  },
+  "environment": {
+    "browser": "Chrome",
+    "device": "desktop web simulating TV playback flow",
+    "page_url": "https://partner.example.com/watch",
+    "repro_frequency": "consistent"
+  },
+  "console_signals": [
+    "NetworkError when attempting to fetch resource",
+    "Player bootstrap request failed",
+    "Playback initialization timed out"
+  ],
+  "network_signals": {
+    "failed_request_url": "https://video.example.com/api/playback/bootstrap",
+    "method": "GET",
+    "status": 504,
+    "failure_type": "timeout",
+    "timing_note": "request stalled beyond client timeout threshold"
+  },
+  "request_headers": {
+    "accept": "application/json",
+    "origin": "https://partner.example.com"
+  },
+  "response_headers": {
+    "content-type": "application/json"
+  },
+  "classification": {
+    "signature_type": "network-request-failure",
+    "support_category": "playback-bootstrap-timeout"
+  },
+  "likely_root_cause": "Playback bootstrap dependency timed out before player initialization completed",
+  "repro_steps": [
+    "Open the partner playback page",
+    "Start the player in a fresh session",
+    "Observe persistent loading state",
+    "Inspect console and network panel during page load",
+    "Confirm timeout or stalled playback bootstrap request"
+  ],
+  "recommended_partner_actions": [
+    "Verify whether the failing playback bootstrap endpoint is reachable",
+    "Capture request timing waterfall",
+    "Retry in a clean session and alternate network environment",
+    "Compare behavior with reduced page complexity or minimal embed setup"
+  ]
+}

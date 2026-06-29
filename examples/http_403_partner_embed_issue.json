@@ -1,0 +1,53 @@
+{
+  "incident_id": "YT-EMBED-403-001",
+  "title": "Partner embed request blocked with HTTP 403",
+  "surface": "embedded player",
+  "partner_report": {
+    "symptom": "Embedded player does not load on partner site",
+    "expected_behavior": "Player loads successfully inside approved partner page",
+    "actual_behavior": "Embed remains blank and network request fails"
+  },
+  "environment": {
+    "browser": "Chrome",
+    "device": "desktop web",
+    "page_url": "https://partner.example.com/embed-page",
+    "repro_frequency": "consistent"
+  },
+  "console_signals": [
+    "Failed to load resource: the server responded with a status of 403",
+    "Embed bootstrap blocked"
+  ],
+  "network_signals": {
+    "failed_request_url": "https://video.example.com/embed/bootstrap",
+    "method": "GET",
+    "status": 403,
+    "failure_type": "http_403"
+  },
+  "request_headers": {
+    "origin": "https://partner.example.com",
+    "referer": "https://partner.example.com/embed-page",
+    "authorization": "Bearer <redacted>"
+  },
+  "response_headers": {
+    "content-type": "application/json",
+    "x-error-reason": "embed_policy_denied"
+  },
+  "classification": {
+    "signature_type": "network-request-failure",
+    "support_category": "partner-embed-policy-mismatch"
+  },
+  "likely_root_cause": "Embed or playback bootstrap request is being denied due to policy, allowlist, referrer, or authorization mismatch",
+  "repro_steps": [
+    "Open the partner embed page",
+    "Reload the page with DevTools open",
+    "Inspect failing embed/bootstrap request",
+    "Verify status code 403 and compare origin/referrer/auth headers",
+    "Confirm whether issue reproduces across sessions"
+  ],
+  "recommended_partner_actions": [
+    "Verify partner origin and referrer are configured correctly",
+    "Confirm authorization token is valid and expected for this embed path",
+    "Check whether the domain is allowlisted for playback/embed use",
+    "Capture response body or header reason for policy denial"
+  ]
+}

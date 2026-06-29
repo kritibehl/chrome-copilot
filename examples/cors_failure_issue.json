@@ -1,0 +1,52 @@
+{
+  "incident_id": "YT-CORS-001",
+  "title": "Partner playback request blocked by CORS",
+  "surface": "embedded player",
+  "partner_report": {
+    "symptom": "Player fails during initialization with browser CORS error",
+    "expected_behavior": "Playback-related request should succeed from partner origin",
+    "actual_behavior": "Browser blocks the request before the player can initialize"
+  },
+  "environment": {
+    "browser": "Chrome",
+    "device": "desktop web",
+    "page_url": "https://partner.example.com/watch",
+    "repro_frequency": "consistent"
+  },
+  "console_signals": [
+    "Access to fetch at 'https://video.example.com/api/playback' from origin 'https://partner.example.com' has been blocked by CORS policy",
+    "Response to preflight request doesn't pass access control check"
+  ],
+  "network_signals": {
+    "failed_request_url": "https://video.example.com/api/playback",
+    "method": "OPTIONS / GET",
+    "status": 0,
+    "failure_type": "cors_failure"
+  },
+  "request_headers": {
+    "origin": "https://partner.example.com",
+    "access-control-request-method": "GET"
+  },
+  "response_headers": {
+    "access-control-allow-origin": null,
+    "access-control-allow-methods": null
+  },
+  "classification": {
+    "signature_type": "cors-policy-failure",
+    "support_category": "cross-origin-policy-misconfiguration"
+  },
+  "likely_root_cause": "Required CORS headers are missing or invalid for the requesting partner origin and method",
+  "repro_steps": [
+    "Open the partner playback page",
+    "Trigger player initialization",
+    "Observe CORS error in console",
+    "Inspect preflight and follow-up request behavior in the network panel",
+    "Verify missing or invalid CORS headers in the response"
+  ],
+  "recommended_partner_actions": [
+    "Verify allowed origin configuration",
+    "Confirm preflight handling for the expected methods and headers",
+    "Check whether credentials/methods/headers align with browser request behavior",
+    "Retry with a minimal reproduction page to isolate embed-specific behavior"
+  ]
+}
